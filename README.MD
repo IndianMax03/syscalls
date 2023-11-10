@@ -17,6 +17,32 @@
 1. Именем структуры в заголовочных файлах Linux
 1. Файлом в каталоге /proc. В этом случае необходимо определить целевую структуру по пути файла в /proc и выводимым данным.
 
+## Реализация
+
+### thread_struct
+
+Поскольку, вся информация о структуре потока [была перенесена](https://elixir.bootlin.com/linux/v6.2.1/source/arch/alpha/include/asm/processor.h#L30) из `thread_struct` в `thread_info`, обратимся к структуре `thread_info`:
+
+Объявление структуры доступно в [заголовочном файле](https://elixir.bootlin.com/linux/v6.2.1/source/arch/alpha/include/asm/thread_info.h#L15):
+
+```C
+struct thread_info {
+	struct pcb_struct	pcb;		/* palcode state */
+
+	struct task_struct	*task;		/* main task structure */
+	unsigned int		flags;		/* low level flags */
+	unsigned int		ieee_state;	/* see fpu.h */
+
+	unsigned		cpu;		/* current CPU */
+	int			preempt_count; /* 0 => preemptable, <0 => BUG */
+	unsigned int		status;		/* thread-synchronous flags */
+
+	int bpt_nsaved;
+	unsigned long bpt_addr[2];		/* breakpoint handling  */
+	unsigned int bpt_insn[2];
+};
+```
+
 ## Автор
 
 > Тучков Максим Русланович
