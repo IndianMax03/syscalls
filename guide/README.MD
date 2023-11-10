@@ -57,7 +57,7 @@ vim include/linux/syscalls.h
 asmlinkage long sys_hello(void)
 ```
 
-1. В файле
+2. В файле
 ```console
 vim kernel/sys_ni.c
 ```
@@ -65,7 +65,7 @@ vim kernel/sys_ni.c
 ```c
 COND_SYSCALL(hello);
 ```
-1. В файле 
+3. В файле 
 ```console
 vim Makefile
 ```
@@ -74,7 +74,7 @@ vim Makefile
 core-y  := hello/
 ```
 
-1. В файле 
+4. В файле 
 ```console
 vim arch/x86/entry/syscalls/syscall_64.tbl
 ```
