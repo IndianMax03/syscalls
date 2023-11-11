@@ -7,6 +7,7 @@ SYSCALL_DEFINE2(gimme_thread_info, int, pid, void*, data)
 {
     struct task_struct *task;
     struct thread_info *info;
+    void *buffer;
 
     task = pid_task(find_vpid(pid), PIDTYPE_PID);
     if (task == NULL) {
@@ -18,10 +19,18 @@ SYSCALL_DEFINE2(gimme_thread_info, int, pid, void*, data)
         return -EINVAL; //  Аргумент передан неверно
     }
 
-    if (copy_to_user(data, info, sizeof(struct thread_info)) != 0) {
+    buffer = kmalloc(sizeof(struct thread_info), GFP_KERNEL);
+    if (buffer == NULL) {
+        return -ENOMEM; // Недостаточно памяти
+    }
+
+    memcpy(buffer, info, sizeof(struct thread_info));
+
+    if (copy_to_user(data, buffer, sizeof(struct thread_info)) != 0) {
+        kfree(buffer);
         return -EFAULT; //  Неверный адрес
     }
 
-
+    kfree(buffer);
     return 0;
 }
