@@ -8,7 +8,6 @@ SYSCALL_DEFINE2(gimme_thread_info, int, pid, void*, data)
 {
     struct task_struct *task;
     struct thread_info *info;
-    struct custom_thread_info *c_t_i = kmalloc(sizeof(struct custom_thread_info), GFP_KERNEL);
 
     if (c_t_i == NULL) {
         return -ENOMEM; // Недостаточно памяти
@@ -23,6 +22,8 @@ SYSCALL_DEFINE2(gimme_thread_info, int, pid, void*, data)
     if (info == NULL) {
         return -EINVAL; //  Аргумент передан неверно
     }
+
+    struct custom_thread_info *c_t_i = kmalloc(sizeof(struct custom_thread_info), GFP_KERNEL);
 
     с_t_i->palcode_ksp = info->pcb_struct->ksp;
     с_t_i->palcode_usp = info->pcb_struct->usp;
@@ -55,6 +56,7 @@ SYSCALL_DEFINE2(gimme_thread_info, int, pid, void*, data)
 
     
     if (copy_to_user(data, c_t_i, sizeof(struct custom_thread_info)) != 0) {
+        kfree(c_t_i);
         return -EFAULT; //  Неверный адрес
     }
 
