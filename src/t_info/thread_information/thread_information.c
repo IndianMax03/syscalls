@@ -9,10 +9,6 @@ SYSCALL_DEFINE2(gimme_thread_info, int, pid, void*, data)
     struct task_struct *task;
     struct thread_info *info;
 
-    if (c_t_i == NULL) {
-        return -ENOMEM; // Недостаточно памяти
-    }
-
     task = pid_task(find_vpid(pid), PIDTYPE_PID);
     if (task == NULL) {
         return -ESRCH; //  Процесс не найден
@@ -24,6 +20,9 @@ SYSCALL_DEFINE2(gimme_thread_info, int, pid, void*, data)
     }
 
     struct custom_thread_info *c_t_i = kmalloc(sizeof(struct custom_thread_info), GFP_KERNEL);
+    if (c_t_i == NULL) {
+        return -ENOMEM; // Недостаточно памяти
+    }
 
     с_t_i->palcode_ksp = info->pcb_struct->ksp;
     с_t_i->palcode_usp = info->pcb_struct->usp;
@@ -39,7 +38,7 @@ SYSCALL_DEFINE2(gimme_thread_info, int, pid, void*, data)
         c_t_i->task_state = info->task->__state;
         c_t_i->task_prio = info->task->prio;
     } else {
-        c_t_i->task_state = -1;
+        c_t_i->task_state = 0;
         c_t_i->task_prio = -1;
     }
     
