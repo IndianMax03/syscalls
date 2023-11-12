@@ -29,19 +29,7 @@ SYSCALL_DEFINE3(gimme_vm_area_info, int, pid, unsigned long, addr, void*, data)
     c_va_i->vm_start = vm_info->vm_start;
     c_va_i->vm_end = vm_info->vm_end;
     c_va_i->vm_flags = vm_info->vm_flags;
-
-    if (vm_info->vm_region != NULL) {
-        c_va_i->vm_region_start = vm_info->vm_region->vm_start;
-        c_va_i->vm_region_end = vm_info->vm_region->vm_end;
-        c_va_i->vm_region_top = vm_info->vm_region->vm_top;
-        c_va_i->vm_region_pgoff = vm_info->vm_region->vm_top;
-    } else {
-        printk("WARN: vm_info->vm_region is null");
-        c_va_i->vm_region_start = 0;
-        c_va_i->vm_region_end = 0;
-        c_va_i->vm_region_top = 0;
-        c_va_i->vm_region_pgoff = 0;
-    }
+    c_va_i->vm_pgoff = vm_info->vm_pgoff;
     
     if (copy_to_user(data, c_va_i, sizeof(struct custom_vm_area_info)) != 0) {
         kfree(c_va_i);

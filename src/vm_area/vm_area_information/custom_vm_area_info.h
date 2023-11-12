@@ -6,10 +6,7 @@ struct custom_vm_area_info
     unsigned long   vm_start;
 	unsigned long   vm_end;
     unsigned long   vm_flags;
-    unsigned long	vm_region_start;
-	unsigned long	vm_region_end;
-	unsigned long	vm_region_top;
-    unsigned long   vm_region_pgoff;
+    unsigned long   vm_pgoff;
 };
 
 
