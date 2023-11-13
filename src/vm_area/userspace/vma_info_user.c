@@ -5,22 +5,45 @@
 #include <unistd.h>
 #include "custom_vm_area_info.h"
 
-#define     ERROR   -1
-#define     OK      0
+#define     ERROR               -1
+#define     OK                  0
+#define     GIMME_VM_AREA_INFO  549
 
-int main(int argc, char* arcgv[])
+int main(int argc, char* argv[])
 {
 
-  struct custom_vm_area_info* data = malloc(sizeof(struct custom_vm_area_info));
+    if (argc != 3) {
+        printf("Invalid usage\n");
+        printf("try: ./prog <pid> <addr>\n");
+        return ERROR;
+    }
 
-  long int retval = syscall(549, getpid(), 12, data);
+    int pid = atoi(argv[1]);
+    unsigned long addr = strtoul(argv[2], NULL, 0);
 
-  printf("scall reted %ld\n", retval);
+    struct custom_vm_area_info* data = malloc(sizeof(struct custom_vm_area_info));
+
+    if (data == NULL) {
+        printf("Cannot allocate memory.\n");
+        return ERROR;
+    }
+
+    long int retval = syscall(GIMME_VM_AREA_INFO, pid, addr, data);
+
+    if (retval != 0) {
+        free(data);
+        printf("Error while syscalling, broo\n");
+        printf("exec: sudo dmesg\n");
+        return ERROR;
+    }
   
-  printf("%lu\n", data->vm_start);
-  printf("%lu\n",data->vm_end);
-  printf("%lu\n",data->vm_flags);
-  printf("%lu\n",data->vm_pgoff);
+    printf("vm_area_struct:\n");
+    printf("--- vm_start = %lu\n", data->vm_start);
+    printf("--- vm_end = %lu\n",data->vm_end);
+    printf("--- vm_flags = %lu\n",data->vm_flags);
+    printf("--- vm_pgoff = %lu\n",data->vm_pgoff);
 
-  return OK;
+    free(data);
+
+    return OK;
 }
