@@ -17,31 +17,42 @@
 1. Именем структуры в заголовочных файлах Linux
 1. Файлом в каталоге /proc. В этом случае необходимо определить целевую структуру по пути файла в /proc и выводимым данным.
 
-## Реализация
+## Предыстория
 
-### thread_struct
+> Поскольку, вся информация о структуре потока [была перенесена](https://elixir.bootlin.com/linux/v6.2.1/source/arch/alpha/include/asm/processor.h#L30) из `thread_struct` в `thread_info`, я общался с `thread_info`
 
-Поскольку, вся информация о структуре потока [была перенесена](https://elixir.bootlin.com/linux/v6.2.1/source/arch/alpha/include/asm/processor.h#L30) из `thread_struct` в `thread_info`, обратимся к структуре `thread_info`:
+Копался я, значит в сорцах ядрышка, искал структуры по варианту, вроде нашел:
 
-Объявление структуры доступно в [заголовочном файле](https://elixir.bootlin.com/linux/v6.2.1/source/arch/alpha/include/asm/thread_info.h#L15):
+- [thread_info](https://elixir.bootlin.com/linux/v6.2.1/source/arch/alpha/include/asm/thread_info.h#L15)
+- [vm_area_struct](https://elixir.bootlin.com/linux/v6.2.1/source/include/linux/mm_types.h#L535)
 
-```C
-struct thread_info {
-	struct pcb_struct	pcb;		/* palcode state */
+И всё бы ничего, если бы в какой-то момент при сборке ядра я не увидел следующую ошибку:
 
-	struct task_struct	*task;		/* main task structure */
-	unsigned int		flags;		/* low level flags */
-	unsigned int		ieee_state;	/* see fpu.h */
-
-	unsigned		cpu;		/* current CPU */
-	int			preempt_count; /* 0 => preemptable, <0 => BUG */
-	unsigned int		status;		/* thread-synchronous flags */
-
-	int bpt_nsaved;
-	unsigned long bpt_addr[2];		/* breakpoint handling  */
-	unsigned int bpt_insn[2];
-};
+```console
+error: 'struct thread_info' has no member named 'pcb'
 ```
+
+Я очень смутился , ведь вроде как pcb есть внутри thread_info...
+
+И тут я решил пойти на [крайние меры](https://stackoverflow.com/questions/77470666/error-while-programming-a-custom-system-call-in-the-linux-kernel-version-6-2-1)...
+
+Отвечающий явно дал понять, что я забрел не в ту структуру. Структура для моей платформы находится тут:
+
+- [thread_info](https://elixir.bootlin.com/linux/latest/source/arch/x86/include/asm/thread_info.h#L56)
+
+К тому моменту моё ядро уже было собрано и я уже тестировал свой системный вызов, однако, я получал следующую ошибку:
+
+```console
+Fatal glibc error: malloc.c:2593 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
+Аварийный останов (образ памяти сброшен на диск)
+```
+
+"Что же это может быть?" - подумал я. 
+"Выглядит как повреждение кучи. Скорее всего вызванное записями за пределами буфера..." - сказал мой коллега
+
+Немного пораскинув мозгами, я понял, что моя структура для thread_info пытается кастить long до int'а
+
+Я [исправил](https://github.com/IndianMax03/syscalls/commit/57570ad561ff44884739d62cfe358f066ae1ecf7) определение структуры и все заработало!
 
 ## Автор
 
