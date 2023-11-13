@@ -9,7 +9,7 @@
 #define     OK                  0
 #define     GIMME_THREAD_INFO   548
 
-int main(int argc, char* arcgv[])
+int main(int argc, char* argv[])
 {
 
     if (argc != 2) {
@@ -18,7 +18,7 @@ int main(int argc, char* arcgv[])
         return ERROR;
     }
 
-    int pid = atoi(arcgv[1]);
+    int pid = atoi(argv[1]);
 
     struct custom_thread_info* data = malloc(sizeof(struct custom_thread_info));
 
