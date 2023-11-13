@@ -9,5 +9,4 @@ struct custom_vm_area_info
     unsigned long   vm_pgoff;
 };
 
-
 #endif
