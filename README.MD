@@ -47,12 +47,34 @@ Fatal glibc error: malloc.c:2593 (sysmalloc): assertion failed: (old_top == init
 Аварийный останов (образ памяти сброшен на диск)
 ```
 
-"Что же это может быть?" - подумал я. 
+"Что же это может быть?" - подумал я.
+
 "Выглядит как повреждение кучи. Скорее всего вызванное записями за пределами буфера..." - сказал мой коллега
 
 Немного пораскинув мозгами, я понял, что моя структура для thread_info пытается кастить long до int'а
 
 Я [исправил](https://github.com/IndianMax03/syscalls/commit/57570ad561ff44884739d62cfe358f066ae1ecf7) определение структуры и все заработало!
+
+## Реализация
+
+Реализация системных вызовов доступна тут:
+
+- [Реализация системного вызова к thread_info](/src/t_info/thread_information/thread_information.c)
+- [Реализация системного вызова к vm_area_struct](/src/vm_area/vm_area_information/vm_area_information.c)
+
+Процесс добавления системного вызова в ядро описан в [гайде](/guide/README.MD).
+
+## Тестирование
+
+Исходный код тесткейсов для системных вызовов доступен тут:
+
+- [Код для тестирования системного вызова к thread_info](/src/t_info/userspace/t_info_user.c)
+- [Код для тестирования системного вызова к vm_area_struct](/src/vm_area/userspace/vma_info_user.c)
+
+Результаты тестирования доступны тут:
+
+- [Результаты тестирования системного вызова к thread_info](/src/t_info/userspace/README.MD)
+- [Результаты тестирования системного вызова к vm_area_struct](/src/vm_area/userspace/README.MD)
 
 ## Автор
 
